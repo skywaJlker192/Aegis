@@ -200,7 +200,7 @@ public class AgentTracker : IAgentTracker
             return;
         }
 
-        var next = MapLayout.Step((tracked.X, tracked.Y), target, _rng, pull: 0.25, jitter: 14);
+        var next = MapLayout.Step((tracked.X, tracked.Y), target, _rng, pull: 0.6, jitter: 30);
         tracked.X = next.X;
         tracked.Y = next.Y;
         tracked.LastActivity = now;
