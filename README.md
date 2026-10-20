@@ -42,13 +42,7 @@ dotnet run
 
 ## Учётные записи
 
-| Роль | Email | Пароль |
-|---|---|---|
-| **Admin** | admin@aegis.org | AegisAdmin1! |
-| Moderator | moderator@aegis.org | Moder123 |
-| Agent (руководитель ЭКСП-001) | agent1@aegis.org | Agent123 |
-| Agent | agent2@aegis.org | Agent123 |
-| Agent | agent3@aegis.org | Agent123 |
+
 
 Новые пользователи через «Регистрацию» автоматически получают роль Agent.
 
