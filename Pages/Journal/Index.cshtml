@@ -1,0 +1,79 @@
+@page
+@model Aegis.Pages.Journal.IndexModel
+@{
+    ViewData["Title"] = "МОЙ ЖУРНАЛ";
+    var types = Enum.GetValues<JournalEntryType>();
+}
+
+<h1 class="page-title cursor">МОЙ ЖУРНАЛ // ПОЛЕВЫЕ ЗАПИСИ</h1>
+
+<section class="grid grid-2">
+    <div class="card">
+        <h2 class="card-title">НОВАЯ ЗАПИСЬ</h2>
+        <form method="post" class="form">
+            <input type="hidden" name="type" value="@Model.Type" />
+            <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+            <div class="form-row">
+                <label asp-for="Input.Date"></label>
+                <input asp-for="Input.Date" type="date" value="@Model.Input.Date.ToString("yyyy-MM-dd")" max="@DateTime.UtcNow.ToString("yyyy-MM-dd")" />
+                <span asp-validation-for="Input.Date" class="field-error"></span>
+            </div>
+
+            <div class="form-row">
+                <label asp-for="Input.ExpeditionId"></label>
+                <select asp-for="Input.ExpeditionId" asp-items="Model.ExpeditionOptions">
+                    <option value="">— БЕЗ ЭКСПЕДИЦИИ —</option>
+                </select>
+                <span asp-validation-for="Input.ExpeditionId" class="field-error"></span>
+            </div>
+
+            <div class="form-row">
+                <label asp-for="Input.EntryType"></label>
+                <select asp-for="Input.EntryType">
+                    @foreach (var t in types)
+                    {
+                        <option value="@t">@UiText.JournalTypeLabel(t)</option>
+                    }
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label asp-for="Input.Text"></label>
+                <textarea asp-for="Input.Text" rows="6" maxlength="1000" id="journal-text"></textarea>
+                <span class="meta"><span id="journal-counter">0</span> / 1000</span>
+                <span asp-validation-for="Input.Text" class="field-error"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary">ДОБАВИТЬ В ЖУРНАЛ</button>
+            <p class="meta">Запись увидит только штаб. В общий журнал экспедиции она попадёт после одобрения координатором.</p>
+        </form>
+    </div>
+
+    <div>
+        <section class="card">
+            <div class="toolbar toolbar-flush">
+                <a class="btn @(Model.TypeFilter is null ? "btn-primary" : "")" asp-page="/Journal/Index">ВСЕ</a>
+                @foreach (var t in types)
+                {
+                    <a class="btn @(Model.TypeFilter == t ? "btn-primary" : "")" asp-page="/Journal/Index" asp-route-type="@t">@UiText.JournalTypeLabel(t)</a>
+                }
+            </div>
+        </section>
+
+        <section id="journal-list">
+            @foreach (var entry in Model.Entries)
+            {
+                <partial name="_Entry" model="entry" />
+            }
+            @if (!Model.Entries.Any())
+            {
+                <p class="muted">Записей пока нет.</p>
+            }
+        </section>
+    </div>
+</section>
+
+@section Scripts {
+    <script src="~/js/journal.js" asp-append-version="true"></script>
+}

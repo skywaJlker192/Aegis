@@ -1,0 +1,57 @@
+@page
+@model Aegis.Pages.Reports.CreateModel
+@{
+    ViewData["Title"] = "НОВЫЙ ОТЧЁТ";
+}
+
+<h1 class="page-title cursor">ПОЛЕВОЙ ОТЧЁТ</h1>
+
+<section class="card narrow">
+    <h2 class="card-title">ПРОТОКОЛ №R-7</h2>
+
+    <form method="post" class="form">
+        <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+        <div class="form-row">
+            <label asp-for="Input.ExpeditionId"></label>
+            @* Варианты выводим вручную, чтобы положить в каждый id и название цели: они нужны сканеру *@
+            <select asp-for="Input.ExpeditionId">
+                <option value="">— ВЫБЕРИТЕ ЭКСПЕДИЦИЮ —</option>
+                @foreach (var o in Model.ExpeditionOptions)
+                {
+                    <option value="@o.Id" data-anomaly-id="@o.AnomalyId" data-anomaly-title="@o.AnomalyTitle">@o.Label</option>
+                }
+            </select>
+            <span asp-validation-for="Input.ExpeditionId" class="field-error"></span>
+        </div>
+
+        <div class="form-row">
+            <label>ПРОТОКОЛ СКАНИРОВАНИЯ АНОМАЛИИ</label>
+            <div class="toolbar toolbar-flush">
+                <button type="button" id="btn-scan" class="btn" disabled>ЗАПУСТИТЬ СКАНИРОВАНИЕ</button>
+                <span id="scan-badge" class="badge status-planned">ТИП НЕ ОПРЕДЕЛЁН</span>
+            </div>
+            <span class="meta">Выберите экспедицию, затем зафиксируйте частоту аномалии в зелёной зоне шкалы.</span>
+        </div>
+
+        <div class="form-row">
+            <label asp-for="Input.Text"></label>
+            <textarea asp-for="Input.Text" rows="8" maxlength="2000"></textarea>
+            <span asp-validation-for="Input.Text" class="field-error"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">ОТПРАВИТЬ В ШТАБ</button>
+        <a class="btn btn-link" asp-page="/Index">ОТМЕНА</a>
+    </form>
+
+    @if (!Model.ExpeditionOptions.Any())
+    {
+        <p class="muted">Вы пока не участвуете ни в одной экспедиции — писать отчёты не по чему.</p>
+    }
+</section>
+
+<partial name="_ScanModal" />
+
+@section Scripts {
+    <script src="~/js/scanner.js" asp-append-version="true"></script>
+}

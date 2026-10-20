@@ -1,0 +1,139 @@
+@using Microsoft.AspNetCore.Antiforgery
+@using Microsoft.AspNetCore.Identity
+@inject IAntiforgery Antiforgery
+@inject UserManager<Agent> UserManager
+@{
+    var isAuth = User.Identity?.IsAuthenticated == true;
+    var isAdmin = User.IsInRole(AppRoles.Admin);
+    var isModerator = User.IsInRole(AppRoles.Moderator);
+    var isAgent = User.IsInRole(AppRoles.Agent);
+    Agent? me = isAuth ? await UserManager.GetUserAsync(User) : null;
+
+    // Токен для AJAX-запросов: JS читает его из <meta name="csrf-token"> и шлёт в заголовке X-CSRF-TOKEN
+    var csrfToken = Antiforgery.GetAndStoreTokens(Context).RequestToken;
+
+    // Пункты меню, на которые не хватает допуска, затемняются (но остаются кликабельными — покажут страницу отказа)
+    int myLevel = me?.ClearanceLevel ?? 1;
+    string NavLock(int required) => myLevel < required ? "nav-locked" : string.Empty;
+    string NavTitle(int required) => myLevel < required ? $"Нужен допуск уровня {required}" : string.Empty;
+    int? deniedLevel = ViewData["ClearanceRequired"] as int?;
+
+    var flash = ViewContext.TempData["Flash"] as string;
+    var flashError = ViewContext.TempData["Error"] as string;
+}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="csrf-token" content="@csrfToken" />
+    <title>@ViewData["Title"] // AEGIS</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body data-realtime="@(isAuth ? "on" : "off")">
+    @if (deniedLevel is not null)
+    {
+        @* Чисто CSS-анимация (без скриптов): красная вспышка и надпись, через 2.5 с overlay исчезает *@
+        <div class="clearance-overlay" aria-hidden="true">
+            <div class="clearance-overlay-box">
+                <div class="clearance-overlay-title">ДОСТУП ЗАПРЕЩЁН</div>
+                <div class="clearance-overlay-sub">ТРЕБУЕТСЯ ДОПУСК УРОВНЯ @deniedLevel</div>
+            </div>
+        </div>
+    }
+
+    <header class="site-header">
+        <div class="header-inner">
+            <a class="logo" asp-page="/Index">
+                <span class="logo-mark cursor">AEGIS</span>
+                <span class="logo-sub">СИТУАЦИОННЫЙ ЦЕНТР</span>
+            </a>
+
+            <nav class="main-nav" aria-label="Уровни допуска">
+                @if (!isAuth)
+                {
+                    <a asp-page="/Account/Login">ВОЙТИ</a>
+                    <a asp-page="/Account/Register">РЕГИСТРАЦИЯ</a>
+                }
+                else
+                {
+                    <a asp-page="/Index">ШТАБ</a>
+
+                    @if (isAgent)
+                    {
+                        <a asp-page="/Expeditions/Index" asp-route-mine="true">МОИ МИССИИ</a>
+                        <a asp-page="/Reports/Create">СОЗДАТЬ ОТЧЁТ</a>
+                        <a asp-page="/Anomalies/Index">КАРТА АНОМАЛИЙ</a>
+                        <a asp-page="/Journal/Index">МОЙ ЖУРНАЛ</a>
+                    }
+
+                    @if (isModerator || isAdmin)
+                    {
+                        <a asp-page="/Anomalies/Index">ВСЕ АНОМАЛИИ</a>
+                        <a asp-page="/Expeditions/Index">УПРАВЛЕНИЕ ЭКСПЕДИЦИЯМИ</a>
+                        <a asp-page="/Map/Index" class="@NavLock(3)" title="@NavTitle(3)">КАРТА ОПЕРАЦИЙ</a>
+                        <a asp-page="/Journal/Moderation">МОДЕРАЦИЯ ЖУРНАЛОВ</a>
+                        <a asp-page="/Reports/Index" class="@NavLock(4)" title="@NavTitle(4)">ОТЧЁТЫ</a>
+                    }
+
+                    @if (isAdmin)
+                    {
+                        <a asp-page="/Admin/Index" class="@NavLock(5)" title="@NavTitle(5)">АДМИН-ПАНЕЛЬ</a>
+                    }
+                }
+            </nav>
+
+            @if (isAuth)
+            {
+                <div class="user-box">
+                    <span class="link-status" title="Состояние канала связи">
+                        <span id="link-lamp" class="lamp lamp-off"></span>
+                        <span id="link-text">СВЯЗЬ: ОЖИДАНИЕ</span>
+                    </span>
+                    <span class="user-id">@(me?.Callsign ?? "АГЕНТ")</span>
+                    @{ var level = me?.ClearanceLevel ?? 1; }
+                    <span class="clearance-badge @UiText.ClearanceClass(level)" title="Уровень допуска @level из 5">
+                        <svg class="clearance-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+                            <rect x="2" y="5" width="20" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="2" />
+                            <circle cx="8" cy="11" r="2" fill="currentColor" />
+                            <path d="M5 16c.6-2 4.4-2 6 0M14 10h5M14 14h4" fill="none" stroke="currentColor" stroke-width="1.6" />
+                        </svg>
+                        ДОПУСК @level
+                    </span>
+                    @* Выход — только POST: форма с Tag Helper получает антифорджери-токен автоматически *@
+                    <form method="post" asp-page="/Account/Logout" class="inline-form">
+                        <button type="submit" class="btn btn-small">ВЫХОД</button>
+                    </form>
+                </div>
+            }
+        </div>
+    </header>
+
+    <main class="container">
+        @if (!string.IsNullOrEmpty(flash))
+        {
+            <div class="alert alert-ok">@flash</div>
+        }
+        @if (!string.IsNullOrEmpty(flashError))
+        {
+            <div class="alert alert-error">@flashError</div>
+        }
+
+        @RenderBody()
+    </main>
+
+    <footer class="site-footer">
+        <span class="cursor">CLASSIFIED DOCUMENT // LEVEL 5 CLEARANCE REQUIRED</span>
+    </footer>
+
+    <div id="toast-area" class="toast-area" aria-live="polite"></div>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @if (isAuth)
+    {
+        <script src="~/lib/signalr/signalr.min.js"></script>
+        <script src="~/js/realtime.js" asp-append-version="true"></script>
+    }
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

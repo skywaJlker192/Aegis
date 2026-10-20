@@ -1,0 +1,92 @@
+@* Схема «Карта операций». Разметка статична (без Razor-выражений): агентов, аномалии и линии связи рисует wwwroot/js/ops-map.js.
+   Сектора нарисованы в тех же точках, что заданы в Services/MapLayout.cs (слоты аномалий). *@
+<div id="ops-map" class="ops-map">
+    <div class="ops-map-bar">
+        <span class="legend-item"><span class="lamp sig-ok"></span>НА СВЯЗИ</span>
+        <span class="legend-item"><span class="lamp sig-warn"></span>ПРЕДУПРЕЖДЕНИЕ</span>
+        <span class="legend-item"><span class="lamp sig-crit"></span>КРИТИЧЕСКИЙ</span>
+        <span id="map-updated" class="map-updated">ОЖИДАНИЕ ДАННЫХ...</span>
+    </div>
+
+    <div class="ops-map-canvas">
+        <svg id="ops-svg" class="ops-svg" viewBox="0 0 800 500" role="img" aria-label="Схема территории и положения агентов">
+            <defs>
+                <pattern id="map-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                    <path d="M 40 0 L 0 0 0 40" class="map-grid-line" />
+                </pattern>
+            </defs>
+
+            <rect x="0" y="0" width="800" height="500" class="map-bg" />
+            <rect x="0" y="0" width="800" height="500" fill="url(#map-grid)" />
+            <rect x="6" y="6" width="788" height="488" class="map-frame" />
+
+            <!-- Рельеф -->
+            <path class="map-contour" d="M 20 60 C 120 20, 260 40, 330 90 S 470 70, 560 30" />
+            <path class="map-contour" d="M 30 410 C 100 380, 200 440, 290 420 S 380 470, 520 480" />
+            <path class="map-contour" d="M 600 470 C 650 420, 720 440, 780 380" />
+
+            <!-- Дороги от базы к секторам -->
+            <line class="map-road" x1="400" y1="400" x2="150" y2="110" />
+            <line class="map-road" x1="400" y1="400" x2="630" y2="100" />
+            <line class="map-road" x1="400" y1="400" x2="690" y2="290" />
+            <line class="map-road" x1="400" y1="400" x2="150" y2="330" />
+            <line class="map-road" x1="400" y1="400" x2="420" y2="170" />
+            <line class="map-road" x1="400" y1="400" x2="300" y2="260" />
+            <line class="map-road" x1="400" y1="400" x2="550" y2="230" />
+            <line class="map-road" x1="400" y1="400" x2="80" y2="230" />
+
+            <!-- Сектора (центры совпадают со слотами MapLayout) -->
+            <rect class="map-sector" x="90" y="75" width="120" height="70" />
+            <text class="map-label" x="150" y="160" text-anchor="middle">ЛЕДНИК Д-7</text>
+            <rect class="map-sector" x="570" y="65" width="120" height="70" />
+            <text class="map-label" x="630" y="150" text-anchor="middle">ШАХТА «ВЕГА»</text>
+            <rect class="map-sector" x="630" y="255" width="120" height="70" />
+            <text class="map-label" x="690" y="340" text-anchor="middle">БЛОК Б</text>
+            <rect class="map-sector" x="90" y="295" width="120" height="70" />
+            <text class="map-label" x="150" y="380" text-anchor="middle">СКЛАД №3</text>
+            <rect class="map-sector" x="360" y="135" width="120" height="70" />
+            <text class="map-label" x="420" y="220" text-anchor="middle">КАСПИЙ-2</text>
+            <rect class="map-sector" x="240" y="225" width="120" height="70" />
+            <text class="map-label" x="300" y="310" text-anchor="middle">СЕКТОР 6</text>
+            <rect class="map-sector" x="490" y="195" width="120" height="70" />
+            <text class="map-label" x="550" y="280" text-anchor="middle">СЕКТОР 7</text>
+            <rect class="map-sector" x="20" y="195" width="120" height="70" />
+            <text class="map-label" x="80" y="280" text-anchor="middle">СЕКТОР 8</text>
+
+            <!-- Штаб -->
+            <rect class="map-base" x="330" y="400" width="140" height="60" />
+            <line class="map-base-antenna" x1="400" y1="400" x2="400" y2="382" />
+            <circle class="map-base-dot" cx="400" cy="380" r="3" />
+            <text class="map-label map-label-strong" x="400" y="434" text-anchor="middle">ШТАБ // БАЗА</text>
+
+            <!-- Компас -->
+            <g class="map-compass">
+                <circle cx="760" cy="44" r="18" />
+                <path d="M 760 28 L 764 44 L 760 60 L 756 44 Z" />
+                <text x="760" y="22" text-anchor="middle">С</text>
+            </g>
+            <text class="map-scale" x="20" y="484">СХЕМА ТЕРРИТОРИИ // МАСШТАБ УСЛОВНЫЙ</text>
+
+            <!-- Динамические слои (заполняет ops-map.js) -->
+            <g id="layer-links"></g>
+            <g id="layer-anomalies"></g>
+            <g id="layer-agents"></g>
+        </svg>
+
+        <aside id="agent-card" class="agent-card" hidden>
+            <div class="agent-card-head">
+                <span id="card-lamp" class="lamp sig-ok"></span>
+                <strong id="card-callsign">—</strong>
+                <button type="button" id="card-close" class="btn btn-small btn-link" aria-label="Закрыть карточку">✕</button>
+            </div>
+            <dl class="agent-card-body">
+                <dt>СОСТОЯНИЕ</dt><dd id="card-status">—</dd>
+                <dt>СВЯЗЬ</dt><dd id="card-signal">—</dd>
+                <dt>ПОСЛ. АКТИВНОСТЬ</dt><dd id="card-last">—</dd>
+                <dt>ЭКСПЕДИЦИЯ</dt>
+                <dd><a id="card-exp" href="#">—</a></dd>
+                <dt>ЦЕЛЬ</dt><dd id="card-target">—</dd>
+            </dl>
+        </aside>
+    </div>
+</div>

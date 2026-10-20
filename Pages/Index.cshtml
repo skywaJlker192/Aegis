@@ -1,0 +1,101 @@
+@page
+@model DashboardViewModel
+@{
+    ViewData["Title"] = "ШТАБ";
+}
+
+<h1 class="page-title cursor">ШТАБ // ОБСТАНОВКА</h1>
+
+<section class="grid grid-4">
+    <div class="card stat">
+        <div class="stat-value">@Model.ActiveAnomalies</div>
+        <div class="stat-label">АКТИВНЫХ АНОМАЛИЙ</div>
+    </div>
+    <div class="card stat">
+        <div class="stat-value">@Model.CriticalAnomalies</div>
+        <div class="stat-label">КРИТИЧЕСКИХ УГРОЗ</div>
+    </div>
+    <div class="card stat">
+        <div class="stat-value">@Model.AgentsInField</div>
+        <div class="stat-label">АГЕНТОВ В ПОЛЕ</div>
+    </div>
+    <div class="card stat">
+        <div class="stat-value" id="online-count">@Model.OnlineNow</div>
+        <div class="stat-label">НА СВЯЗИ СЕЙЧАС</div>
+    </div>
+</section>
+
+<section class="grid grid-2">
+    <div class="card">
+        <h2 class="card-title">ОСНОВНЫЕ УГРОЗЫ</h2>
+        <ul class="threat-list">
+            @foreach (var a in Model.TopAnomalies)
+            {
+                <li>
+                    <span class="lamp @UiText.ThreatClass(a.ThreatLevel)" data-anomaly-id="@a.Id"></span>
+                    <a asp-page="/Anomalies/Details" asp-route-id="@a.Id">@a.Title</a>
+                    <span class="badge @UiText.ThreatClass(a.ThreatLevel)" data-anomaly-id="@a.Id" data-threat-label-for="@a.Id">@UiText.ThreatLabel(a.ThreatLevel)</span>
+                </li>
+            }
+        </ul>
+        <p class="meta">Цвет индикаторов обновляется мгновенно, без перезагрузки страницы.</p>
+    </div>
+
+    <div class="card">
+        <h2 class="card-title">ЖУРНАЛ СОБЫТИЙ</h2>
+        <ul id="event-feed" class="terminal">
+            <li class="terminal-line">СИСТЕМА // ожидание событий...</li>
+        </ul>
+    </div>
+</section>
+
+@if (Model.ShowMap)
+{
+    <section class="card">
+        <div class="card-head">
+            <h2 class="card-title">КАРТА ОПЕРАЦИЙ // АГЕНТЫ В РЕАЛЬНОМ ВРЕМЕНИ</h2>
+            <a class="btn btn-small" asp-page="/Map/Index">ОТКРЫТЬ НА ВЕСЬ ЭКРАН</a>
+        </div>
+        <partial name="_OpsMap" />
+    </section>
+}
+
+<section class="card">
+    <h2 class="card-title">ПОСЛЕДНИЕ ЭКСПЕДИЦИИ</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>КОД</th>
+                <th>ЦЕЛЬ</th>
+                <th>РУКОВОДИТЕЛЬ</th>
+                <th>НАЧАЛО</th>
+                <th>ЭКИПАЖ</th>
+                <th>СТАТУС</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var e in Model.RecentExpeditions)
+            {
+                <tr>
+                    <td><a asp-page="/Expeditions/Details" asp-route-id="@e.Id">@UiText.ExpeditionCode(e.Id)</a></td>
+                    <td>@e.Anomaly.Title</td>
+                    <td>@e.Leader.Callsign</td>
+                    <td>@e.StartDate.ToString("yyyy-MM-dd")</td>
+                    <td>@e.Members.Count</td>
+                    <td><span class="badge @UiText.ExpeditionStatusClass(e.Status)">@UiText.ExpeditionStatusLabel(e.Status)</span></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    @if (!Model.RecentExpeditions.Any())
+    {
+        <p class="muted">Экспедиций пока нет.</p>
+    }
+</section>
+
+@section Scripts {
+    @if (Model.ShowMap)
+    {
+        <script src="~/js/ops-map.js" asp-append-version="true"></script>
+    }
+}

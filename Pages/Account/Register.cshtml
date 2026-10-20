@@ -1,0 +1,44 @@
+@page
+@model RegisterModel
+@{
+    ViewData["Title"] = "РЕГИСТРАЦИЯ";
+}
+
+<h1 class="page-title cursor">ЗАПРОС ДОПУСКА</h1>
+
+<section class="card narrow">
+    <h2 class="card-title">ПРОТОКОЛ РЕГИСТРАЦИИ АГЕНТА</h2>
+
+    <form method="post" class="form">
+        <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+        <div class="form-row">
+            <label asp-for="Input.Email"></label>
+            <input asp-for="Input.Email" autocomplete="username" />
+            <span asp-validation-for="Input.Email" class="field-error"></span>
+        </div>
+
+        <div class="form-row">
+            <label asp-for="Input.Callsign"></label>
+            <input asp-for="Input.Callsign" />
+            <span asp-validation-for="Input.Callsign" class="field-error"></span>
+        </div>
+
+        <div class="form-row">
+            <label asp-for="Input.Password"></label>
+            <input asp-for="Input.Password" autocomplete="new-password" />
+            <span asp-validation-for="Input.Password" class="field-error"></span>
+        </div>
+
+        <div class="form-row">
+            <label asp-for="Input.ConfirmPassword"></label>
+            <input asp-for="Input.ConfirmPassword" autocomplete="new-password" />
+            <span asp-validation-for="Input.ConfirmPassword" class="field-error"></span>
+        </div>
+
+        <p class="meta">Новым агентам присваивается роль AGENT и допуск уровня 1.</p>
+
+        <button type="submit" class="btn btn-primary">ЗАРЕГИСТРИРОВАТЬСЯ</button>
+        <a class="btn btn-link" asp-page="/Account/Login">УЖЕ ЕСТЬ ДОПУСК? ВОЙТИ</a>
+    </form>
+</section>

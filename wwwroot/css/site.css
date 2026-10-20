@@ -1,0 +1,643 @@
+/* ==========================================================
+   AEGIS // ситуационный центр
+   Ретро-футуризм 70-80х: секретная лаборатория, терминал.
+   ========================================================== */
+
+:root {
+    --bg: #1a1a1a;          /* основной фон */
+    --bg2: #2d2d2d;         /* вторичный фон */
+    --accent: #4a6741;      /* приглушённый оливковый */
+    --accent-text: #8b9d77; /* светло-зелёный для текста */
+    --warn: #c9a227;        /* янтарный */
+    --crit: #8b3a3a;        /* тёмно-красный */
+    --text: #d4d4d4;
+    --border: #3d3d3d;
+
+    --mono: 'Courier New', Consolas, monospace;
+    --head: 'Segoe UI', Tahoma, Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+/* Атрибут hidden должен скрывать элемент всегда, даже если у класса задан display (например .btn) */
+[hidden] { display: none !important; }
+
+html, body { margin: 0; padding: 0; }
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 15px;
+    line-height: 1.5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+/* Эффект сканлайнов: еле заметные горизонтальные линии поверх всей страницы */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1000;
+    background: repeating-linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0) 0,
+        rgba(0, 0, 0, 0) 2px,
+        rgba(0, 0, 0, 0.18) 3px,
+        rgba(0, 0, 0, 0) 4px
+    );
+}
+
+a { color: var(--accent-text); text-decoration: none; border-bottom: 1px dotted var(--accent); }
+a:hover { color: var(--text); border-bottom-color: var(--text); }
+
+code { background: var(--bg2); padding: 1px 5px; border: 1px solid var(--border); }
+
+/* ---------- Заголовки: Segoe UI, верхний регистр, letter-spacing ---------- */
+h1, h2, h3, .logo, .btn, .main-nav a, th {
+    font-family: var(--head);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.page-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--accent-text);
+    margin: 8px 0 20px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--accent);
+}
+
+/* Мигающий курсор после заголовка (CSS animation) */
+.cursor::after {
+    content: "_";
+    margin-left: 4px;
+    color: var(--accent-text);
+    animation: blink 1.1s steps(1) infinite;
+}
+
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    50.01%, 100% { opacity: 0; }
+}
+
+/* ---------- Шапка ---------- */
+.site-header {
+    background: var(--bg2);
+    border-bottom: 2px solid var(--accent);
+}
+
+.header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.logo { display: flex; flex-direction: column; border: 0; line-height: 1.1; }
+.logo-mark { font-size: 28px; font-weight: 700; color: var(--accent-text); letter-spacing: 6px; }
+.logo-sub { font-size: 10px; color: var(--text); opacity: .6; letter-spacing: 3px; }
+
+.main-nav { display: flex; gap: 4px; flex-wrap: wrap; flex: 1; }
+.main-nav a {
+    padding: 6px 12px;
+    font-size: 12px;
+    border: 1px solid transparent;
+    color: var(--text);
+}
+.main-nav a:hover { border-color: var(--accent); background: var(--bg); }
+
+.user-box { display: flex; align-items: center; gap: 14px; font-size: 12px; flex-wrap: wrap; }
+.user-id { color: var(--accent-text); }
+.link-status { display: inline-flex; align-items: center; gap: 6px; }
+
+/* ---------- Контейнер, футер ---------- */
+.container { max-width: 1200px; width: 100%; margin: 0 auto; padding: 24px 20px; flex: 1; }
+
+.site-footer {
+    text-align: center;
+    padding: 14px;
+    border-top: 1px solid var(--border);
+    background: var(--bg2);
+    color: var(--crit);
+    font-size: 12px;
+    letter-spacing: 3px;
+}
+.site-footer .cursor::after { color: var(--crit); }
+
+/* ---------- Карточки ---------- */
+.card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.45);
+    padding: 16px 18px;
+    margin-bottom: 20px;
+}
+.card.narrow { max-width: 640px; }
+.card-critical { border-color: var(--crit); }
+.card-title {
+    margin: 0 0 12px;
+    font-size: 15px;
+    color: var(--accent-text);
+    font-weight: 600;
+}
+.card-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+.grid { display: grid; gap: 20px; margin-bottom: 20px; }
+.grid > .card { margin-bottom: 0; }
+.grid-4 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.grid-2 { grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); }
+
+.stat { text-align: center; }
+.stat-value { font-size: 44px; font-weight: 700; color: var(--accent-text); font-family: var(--head); }
+.stat-label { font-size: 11px; letter-spacing: 2px; opacity: .8; }
+
+.meta { font-size: 12px; opacity: .65; }
+.muted { opacity: .6; }
+.nowrap { white-space: nowrap; }
+
+/* ---------- Кнопки: прямоугольные, без скруглений, тонкая рамка ---------- */
+.btn {
+    display: inline-block;
+    background: transparent;
+    color: var(--accent-text);
+    border: 1px solid var(--accent);
+    border-radius: 0;
+    padding: 7px 14px;
+    font-size: 12px;
+    cursor: pointer;
+}
+.btn:hover { background: var(--accent); color: var(--text); }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.btn-primary { background: var(--accent); color: var(--text); }
+.btn-primary:hover { background: var(--accent-text); color: var(--bg); }
+.btn-danger { border-color: var(--crit); color: #d08a8a; }
+.btn-danger:hover { background: var(--crit); color: var(--text); }
+.btn-small { padding: 3px 8px; font-size: 11px; }
+.btn-link { border-color: transparent; }
+
+/* ---------- Формы («протоколы отчётов») ---------- */
+.form-row { margin-bottom: 14px; display: flex; flex-direction: column; gap: 4px; }
+.form-row-check { flex-direction: row; align-items: center; gap: 8px; }
+.form label { font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: var(--accent-text); }
+
+input[type=text], input[type=email], input[type=password], input[type=date],
+input[type=number], select, textarea {
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 0;
+    padding: 8px 10px;
+    font-family: var(--mono);
+    font-size: 14px;
+    width: 100%;
+}
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent-text); }
+.toolbar input, .toolbar select, .inline-form input, .inline-form select { width: auto; }
+.input-tiny { width: 60px !important; }
+
+.field-error, .validation-summary { color: #d08a8a; font-size: 13px; }
+.validation-summary ul { margin: 0 0 12px; padding-left: 18px; }
+
+.alert { padding: 10px 14px; margin-bottom: 18px; border: 1px solid; }
+.alert-ok { border-color: var(--accent); color: var(--accent-text); background: rgba(74, 103, 65, .15); }
+.alert-error { border-color: var(--crit); color: #d08a8a; background: rgba(139, 58, 58, .15); }
+
+.toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 14px; }
+.card > .toolbar:first-child { margin-top: 0; }
+.inline-form { display: inline-flex; gap: 6px; align-items: center; margin: 0 4px 4px 0; }
+
+/* ---------- Таблицы ---------- */
+.table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.table th {
+    text-align: left;
+    font-size: 11px;
+    color: var(--accent-text);
+    border-bottom: 1px solid var(--accent);
+    padding: 6px 8px;
+}
+.table td { padding: 8px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.table tr:hover td { background: rgba(0, 0, 0, .2); }
+
+/* ---------- Досье ---------- */
+.dossier { display: grid; grid-template-columns: 200px 1fr; gap: 6px 16px; margin: 12px 0; }
+.dossier dt { color: var(--accent-text); font-size: 12px; letter-spacing: 2px; }
+.dossier dd { margin: 0; }
+
+/* ---------- Индикаторы-«лампочки» и бейджи ---------- */
+.lamp {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 6px currentColor;
+    color: var(--accent);
+    vertical-align: middle;
+    margin-right: 6px;
+    border: 1px solid rgba(0, 0, 0, .5);
+    transition: background .4s, color .4s;
+}
+.lamp-off { background: #555; color: #555; box-shadow: none; }
+.lamp-on { background: var(--accent-text); color: var(--accent-text); }
+.lamp-lost { background: var(--crit); color: var(--crit); }
+
+/* Уровни угрозы: зелёный / жёлтый / красный */
+.threat-low { background: var(--accent); color: var(--accent); }
+.threat-medium { background: var(--warn); color: var(--warn); }
+.threat-high { background: #b06a1f; color: #b06a1f; }
+.threat-critical { background: var(--crit); color: var(--crit); }
+.lamp.threat-critical { animation: pulse 1.6s ease-in-out infinite; }
+
+@keyframes pulse {
+    0%, 100% { box-shadow: 0 0 3px currentColor; }
+    50% { box-shadow: 0 0 12px currentColor; }
+}
+
+/* Статусы экспедиции */
+.status-planned { background: #555; color: #555; }
+.status-active { background: var(--accent); color: var(--accent); }
+.status-completed { background: #3b5a73; color: #3b5a73; }
+.status-aborted { background: var(--crit); color: var(--crit); }
+
+.badge {
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: 11px;
+    letter-spacing: 1px;
+    font-family: var(--head);
+    border: 1px solid rgba(0, 0, 0, .4);
+    color: #f0f0f0;
+    transition: background .4s;
+}
+
+.threat-list { list-style: none; padding: 0; margin: 0; }
+.threat-list li { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--border); }
+.threat-list li a { flex: 1; }
+
+/* ---------- Терминал: логи и телеметрия ---------- */
+.terminal {
+    list-style: none;
+    margin: 0;
+    padding: 10px 12px;
+    background: #101310;
+    border: 1px solid var(--accent);
+    color: var(--accent-text);
+    font-size: 13px;
+    height: 220px;
+    overflow-y: auto;
+}
+.terminal-line { padding: 1px 0; }
+.terminal-line::before { content: "> "; color: var(--accent); }
+.terminal-line.warn { color: var(--warn); }
+.terminal-line.crit { color: #d08a8a; }
+
+/* ---------- Полевые отчёты ---------- */
+.report { border: 1px solid var(--border); border-left: 4px solid var(--warn); margin: 0 0 14px; padding: 10px 14px; background: var(--bg); transition: background .5s, border-color .5s; }
+.report-head { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; opacity: .85; margin-bottom: 6px; }
+.report-text { white-space: pre-wrap; word-break: break-word; margin: 6px 0 10px; font-family: var(--mono); }
+.report-approved { border-left-color: var(--accent-text); background: rgba(74, 103, 65, .28); }
+.report-pending .report-state { background: var(--warn); color: #1a1a1a; }
+.report-approved .report-state { background: var(--accent); }
+
+/* ---------- Всплывающие уведомления ---------- */
+.toast-area { position: fixed; right: 16px; bottom: 16px; z-index: 1100; display: flex; flex-direction: column; gap: 8px; max-width: 360px; }
+.toast { background: var(--bg2); border: 1px solid var(--accent); color: var(--text); padding: 10px 14px; font-size: 13px; box-shadow: 4px 4px 0 rgba(0, 0, 0, .5); }
+.toast.warn { border-color: var(--warn); }
+.toast.crit { border-color: var(--crit); }
+
+@media (max-width: 700px) {
+    .dossier { grid-template-columns: 1fr; }
+    .grid-2 { grid-template-columns: 1fr; }
+}
+
+/* ==========================================================
+   ФИЧА 1: «Протокол сканирования» (модальное окно, шкала, ползунок)
+   ========================================================== */
+.toolbar-flush { margin-top: 0; }
+
+.modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    background: rgba(0, 0, 0, .8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+.modal[hidden] { display: none; }
+.modal-box {
+    background: var(--bg2);
+    border: 1px solid var(--accent);
+    box-shadow: 6px 6px 0 rgba(0, 0, 0, .6);
+    width: 100%;
+    max-width: 760px;
+    padding: 18px 20px;
+}
+body.modal-open { overflow: hidden; }
+
+/* Экран сканера: тёмно-зелёный терминал */
+.scan-screen {
+    position: relative;
+    overflow: hidden;
+    background: #0a130a;
+    border: 1px solid var(--accent);
+    padding: 16px 18px 12px;
+    color: var(--accent-text);
+}
+
+/* Движущаяся линия сканера, как на радаре */
+.scan-radar {
+    position: absolute;
+    left: 0; right: 0;
+    height: 46px;
+    top: -46px;
+    background: linear-gradient(to bottom, rgba(139, 157, 119, 0), rgba(139, 157, 119, .22));
+    border-bottom: 1px solid rgba(139, 157, 119, .55);
+    animation: radar 3.2s linear infinite;
+    pointer-events: none;
+}
+@keyframes radar {
+    from { top: -46px; }
+    to   { top: 100%; }
+}
+
+.scan-status { font-family: var(--head); letter-spacing: 3px; font-size: 13px; min-height: 20px; }
+
+/* Мигающий блок-курсор после «СКАНИРОВАНИЕ» */
+.cursor-block {
+    display: inline-block;
+    width: 9px;
+    height: 15px;
+    margin-left: 6px;
+    vertical-align: -2px;
+    background: var(--accent-text);
+    animation: blink 1s steps(1) infinite;
+}
+
+.scan-readout { text-align: center; margin: 8px 0 14px; }
+.scan-freq {
+    font-family: var(--mono);
+    font-size: 54px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    color: #a9c08f;
+    text-shadow: 0 0 10px rgba(139, 157, 119, .6);
+}
+.scan-unit { font-size: 16px; margin-left: 6px; opacity: .8; }
+
+/* Шкала частот */
+.scan-track {
+    position: relative;
+    height: 64px;
+    border: 1px solid var(--accent);
+    background:
+        repeating-linear-gradient(to right, rgba(139, 157, 119, .35) 0, rgba(139, 157, 119, .35) 1px, transparent 1px, transparent 10%),
+        #070d07;
+}
+
+/* Зелёная зона захвата */
+.scan-zone {
+    position: absolute;
+    top: 0; bottom: 0;
+    left: 45%;
+    width: 4%;
+    background: rgba(90, 160, 80, .38);
+    border-left: 1px solid #8fd37f;
+    border-right: 1px solid #8fd37f;
+    box-shadow: 0 0 14px rgba(90, 160, 80, .5) inset;
+}
+
+/* Ползунок: движется только CSS-анимацией. JS лишь считывает его положение. */
+.scan-needle {
+    position: absolute;
+    top: -8px; bottom: -8px;
+    left: 0;
+    width: 3px;
+    background: #e4e4e4;
+    box-shadow: 0 0 10px #8b9d77, 0 0 3px #fff;
+    animation: scan-sweep 5s linear infinite alternate;
+    animation-play-state: paused;
+}
+.scan-needle.sweeping { animation-play-state: running; }
+.scan-needle.frozen { animation-play-state: paused; }
+
+@keyframes scan-sweep {
+    from { left: 0%; }
+    to   { left: 100%; }
+}
+
+.scan-scale { display: flex; justify-content: space-between; font-size: 11px; opacity: .6; margin-top: 4px; }
+
+.scan-result { min-height: 24px; margin-top: 10px; font-size: 14px; letter-spacing: 1px; }
+.scan-result.hit { color: #a9d68f; }
+.scan-result.miss { color: #d08a8a; }
+
+@media (max-width: 700px) {
+    .scan-freq { font-size: 38px; }
+}
+
+/* ==========================================================
+   ФИЧА 2: «Карта операций» (живой трекер агентов)
+   ========================================================== */
+.ops-map-bar { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; font-size: 12px; letter-spacing: 1px; margin-bottom: 8px; }
+.legend-item { display: inline-flex; align-items: center; }
+.map-updated { margin-left: auto; opacity: .7; }
+
+.ops-map-canvas { position: relative; border: 1px solid var(--accent); background: #0a110a; }
+.ops-svg { display: block; width: 100%; height: auto; }
+
+.map-bg { fill: #0a110a; }
+.map-grid-line { fill: none; stroke: rgba(74, 103, 65, .28); stroke-width: 1; }
+.map-frame { fill: none; stroke: var(--accent); stroke-width: 1; }
+.map-contour { fill: none; stroke: rgba(139, 157, 119, .18); stroke-width: 1; }
+.map-road { stroke: rgba(139, 157, 119, .2); stroke-width: 1; stroke-dasharray: 3 6; }
+.map-sector { fill: rgba(74, 103, 65, .06); stroke: var(--accent); stroke-width: 1; stroke-dasharray: 5 4; }
+.map-label { fill: var(--accent-text); font-family: var(--head); font-size: 10px; letter-spacing: 2px; opacity: .8; }
+.map-label-strong { font-size: 12px; opacity: 1; }
+.map-base { fill: rgba(74, 103, 65, .25); stroke: var(--accent-text); stroke-width: 1.5; }
+.map-base-antenna { stroke: var(--accent-text); stroke-width: 1.5; }
+.map-base-dot { fill: var(--accent-text); animation: blink 1.4s steps(1) infinite; }
+.map-compass circle { fill: none; stroke: var(--accent); }
+.map-compass path { fill: var(--accent-text); opacity: .7; }
+.map-compass text { fill: var(--accent-text); font-size: 10px; font-family: var(--head); }
+.map-scale { fill: var(--accent-text); opacity: .45; font-size: 9px; letter-spacing: 2px; font-family: var(--head); }
+
+/* Линии связи между агентами одной экспедиции: бегущий пунктир */
+.map-link {
+    stroke: var(--accent-text);
+    stroke-width: 1.2;
+    stroke-dasharray: 6 5;
+    opacity: .75;
+    animation: link-flow 1.2s linear infinite;
+}
+@keyframes link-flow { to { stroke-dashoffset: -22; } }
+
+/* Маркеры аномалий */
+.anomaly-marker { cursor: default; }
+.anomaly-shape { stroke: rgba(0, 0, 0, .6); stroke-width: 1; }
+.anomaly-code { fill: var(--text); font-size: 9px; letter-spacing: 1px; font-family: var(--mono); opacity: .8; }
+.anomaly-marker.threat-low .anomaly-shape { fill: var(--accent); }
+.anomaly-marker.threat-medium .anomaly-shape { fill: var(--warn); }
+.anomaly-marker.threat-high .anomaly-shape { fill: #b06a1f; }
+.anomaly-marker.threat-critical .anomaly-shape { fill: var(--crit); stroke: #d08a8a; }
+/* У .threat-* заданы цвета для «лампочек»; для группы-маркера они не нужны */
+.anomaly-marker.threat-low, .anomaly-marker.threat-medium, .anomaly-marker.threat-high, .anomaly-marker.threat-critical { background: none; }
+
+/* Агенты: мигающая точка, цвет зависит от связи */
+.agent { cursor: pointer; outline: none; transition: none; }
+.agent-dot { stroke: rgba(0, 0, 0, .7); stroke-width: 1; }
+.agent-pulse { fill: none; stroke-width: 1.5; transform-box: fill-box; transform-origin: center; animation: agent-ping 2s ease-out infinite; }
+.agent-label { fill: var(--text); font-size: 10px; letter-spacing: 1px; font-family: var(--mono); paint-order: stroke; stroke: #0a110a; stroke-width: 3px; }
+
+.agent.sig-ok .agent-dot { fill: #8fb87a; }
+.agent.sig-ok .agent-pulse { stroke: #8fb87a; }
+.agent.sig-warn .agent-dot { fill: var(--warn); }
+.agent.sig-warn .agent-pulse { stroke: var(--warn); animation-duration: 1.3s; }
+.agent.sig-crit .agent-dot { fill: var(--crit); stroke: #d08a8a; }
+.agent.sig-crit .agent-pulse { stroke: #d08a8a; animation-duration: .8s; }
+.agent.selected .agent-dot { stroke: #fff; stroke-width: 2; }
+.agent:focus-visible .agent-dot, .agent:hover .agent-dot { stroke: #fff; stroke-width: 2; }
+
+@keyframes agent-ping {
+    0%   { transform: scale(1);   opacity: .9; }
+    100% { transform: scale(3.2); opacity: 0; }
+}
+
+/* Лампочки легенды и карточки (цвет по уровню связи) */
+.lamp.sig-ok { background: #8fb87a; color: #8fb87a; }
+.lamp.sig-warn { background: var(--warn); color: var(--warn); }
+.lamp.sig-crit { background: var(--crit); color: #d08a8a; animation: pulse 1.2s ease-in-out infinite; }
+
+/* Карточка агента */
+.agent-card {
+    position: absolute;
+    right: 12px; top: 12px;
+    width: 270px;
+    background: #1a1a1a;
+    border: 1px solid var(--accent-text);
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, .5);
+    padding: 10px 12px;
+    animation: card-in .18s ease-out;
+}
+@keyframes card-in { from { transform: translateY(-6px); } to { transform: none; } }
+.agent-card-head { display: flex; align-items: center; gap: 8px; font-family: var(--head); letter-spacing: 2px; }
+.agent-card-head strong { flex: 1; color: var(--accent-text); }
+.agent-card-body { display: grid; grid-template-columns: 110px 1fr; gap: 4px 8px; margin: 8px 0 0; font-size: 12px; }
+.agent-card-body dt { color: var(--accent-text); font-size: 10px; letter-spacing: 1px; }
+.agent-card-body dd { margin: 0; word-break: break-word; }
+
+.terminal-short { height: 130px; }
+
+@media (max-width: 700px) {
+    .agent-card { position: static; width: auto; margin: 8px; }
+}
+
+/* ==========================================================
+   ФИЧА 3: «Протокол связи» (чат штаб-поле)
+   ========================================================== */
+.comms-log { height: 260px; }
+
+.comm-line { list-style: none; padding: 2px 0; word-break: break-word; }
+.comm-time { opacity: .6; }
+
+/* Сообщения агента — зелёный, штаба — янтарный, системные — серый */
+.comm-agent  { color: #8fb87a; }
+.comm-hq     { color: var(--warn); }
+.comm-system { color: #8a8a8a; font-style: italic; }
+.comm-hq .comm-who { font-weight: 700; }
+.comm-new { color: var(--warn); font-size: 11px; letter-spacing: 1px; }
+.legend-text { font-size: 12px; letter-spacing: 1px; }
+
+.comms-form { display: flex; gap: 10px; margin-top: 12px; }
+.comms-form input { flex: 1; width: auto; }
+
+/* Мигающий индикатор «НА СВЯЗИ» */
+.lamp-live { background: #8fb87a; color: #8fb87a; animation: live-blink 1.4s ease-in-out infinite; }
+@keyframes live-blink {
+    0%, 100% { opacity: 1; box-shadow: 0 0 8px currentColor; }
+    50%      { opacity: .35; box-shadow: none; }
+}
+.badge-unread { background: transparent; color: var(--warn); border: 1px solid var(--warn); }
+
+/* ==========================================================
+   ФИЧА 4: визуальная система допусков
+   ========================================================== */
+.clearance-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 2px 8px; border: 1px solid currentColor; border-radius: 2px;
+    font-size: 12px; letter-spacing: 1px; white-space: nowrap;
+}
+.clearance-icon { flex: none; }
+.clearance-low  { color: #8b9d77; }   /* 1–2: приглушённый зелёный */
+.clearance-mid  { color: #c9a227; }   /* 3: янтарный */
+.clearance-high { color: #c26a6a; }   /* 4–5: красный (светлее #8b3a3a, чтобы читался на тёмном фоне) */
+
+.nav-locked { opacity: .45; }
+
+/* Overlay «ДОСТУП ЗАПРЕЩЁН»: сам исчезает и не перехватывает клики */
+.clearance-overlay {
+    position: fixed; inset: 0; z-index: 1000; pointer-events: none;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(139, 58, 58, .35);
+    animation: clearance-fade 2.5s ease-out forwards;
+}
+.clearance-overlay::before {
+    content: ""; position: absolute; inset: 0;
+    background: repeating-linear-gradient(0deg, rgba(0,0,0,.25) 0 2px, transparent 2px 4px);
+}
+.clearance-overlay-box {
+    position: relative; text-align: center; padding: 24px 40px;
+    background: #1a1a1a; border: 2px solid var(--crit);
+    animation: clearance-shake .5s linear 2;
+}
+.clearance-overlay-title { color: #c26a6a; font-size: 32px; letter-spacing: 6px; }
+.clearance-overlay-sub { color: var(--text); margin-top: 8px; letter-spacing: 2px; }
+
+@keyframes clearance-fade {
+    0%, 70% { opacity: 1; visibility: visible; }
+    100%    { opacity: 0; visibility: hidden; }
+}
+@keyframes clearance-shake {
+    0%, 100% { transform: translateX(0); }
+    25%      { transform: translateX(-8px); }
+    75%      { transform: translateX(8px); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .clearance-overlay-box { animation: none; }
+}
+
+/* ==========================================================
+   ФИЧА 5: журнал агента
+   ========================================================== */
+input[type=date] {
+    background: var(--bg); color: var(--text); border: 1px solid var(--border);
+    padding: 8px 10px; font-family: var(--mono); color-scheme: dark;
+}
+.journal-entry {
+    --jcolor: var(--accent-text);
+    border: 1px solid var(--border); border-left: 4px solid var(--jcolor);
+    background: var(--bg2); padding: 10px 14px; margin-bottom: 12px;
+}
+.journal-observation { --jcolor: #8b9d77; }  /* наблюдение — зелёный */
+.journal-alert       { --jcolor: #c26a6a; }  /* тревога — красный */
+.journal-report      { --jcolor: #c9a227; }  /* отчёт — янтарный */
+.journal-head { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: center; font-size: 13px; }
+.journal-type { color: var(--jcolor); font-weight: 700; letter-spacing: 1px; }
+.journal-date, .journal-author { opacity: .8; }
+.journal-text { margin: 8px 0 0; white-space: pre-wrap; word-break: break-word; }
+.journal-state { margin-left: auto; background: var(--border); color: var(--text); }
+.journal-pending .journal-state  { background: var(--warn); color: #1a1a1a; }
+.journal-approved .journal-state { background: var(--accent); color: var(--text); }
+.journal-rejected { opacity: .7; }
+.journal-rejected .journal-state { background: var(--crit); color: var(--text); }
+.journal-actions { margin-top: 10px; }

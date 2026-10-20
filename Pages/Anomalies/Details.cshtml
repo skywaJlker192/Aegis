@@ -1,0 +1,111 @@
+@page "{id:int}"
+@model Aegis.Pages.Anomalies.DetailsModel
+@{
+    ViewData["Title"] = UiText.AnomalyCode(Model.Anomaly.Id);
+}
+
+<h1 class="page-title cursor">ДОСЬЕ // @UiText.AnomalyCode(Model.Anomaly.Id)</h1>
+
+<section class="card">
+    <div class="card-head">
+        <h2 class="card-title">@Model.Anomaly.Title</h2>
+        <span class="badge @UiText.ThreatClass(Model.Anomaly.ThreatLevel)" data-anomaly-id="@Model.Anomaly.Id" data-threat-label-for="@Model.Anomaly.Id">@UiText.ThreatLabel(Model.Anomaly.ThreatLevel)</span>
+    </div>
+
+    <dl class="dossier">
+        <dt>УРОВЕНЬ УГРОЗЫ</dt>
+        <dd>
+            <span class="lamp @UiText.ThreatClass(Model.Anomaly.ThreatLevel)" data-anomaly-id="@Model.Anomaly.Id"></span>
+            <span data-threat-label-for="@Model.Anomaly.Id">@UiText.ThreatLabel(Model.Anomaly.ThreatLevel)</span>
+        </dd>
+
+        <dt>СТАТУС</dt>
+        <dd>@UiText.AnomalyStatusLabel(Model.Anomaly.Status)</dd>
+
+        <dt>ТИП (СКАНИРОВАНИЕ)</dt>
+        <dd>@UiText.KindLabel(Model.Anomaly.Kind)@(Model.Anomaly.ScannedAt.HasValue ? " // " + Model.Anomaly.ScannedAt.Value.ToString("yyyy-MM-dd HH:mm") + " UTC" : "")</dd>
+
+        <dt>КООРДИНАТЫ</dt>
+        <dd>@Model.Anomaly.Latitude.ToString("F7", CultureInfo.InvariantCulture), @Model.Anomaly.Longitude.ToString("F7", CultureInfo.InvariantCulture)</dd>
+
+        <dt>ОБНАРУЖЕНА</dt>
+        <dd>@Model.Anomaly.DetectedAt.ToString("yyyy-MM-dd HH:mm") UTC</dd>
+
+        <dt>ОПИСАНИЕ</dt>
+        <dd>@Model.Anomaly.Description</dd>
+    </dl>
+
+    @* Кнопки действий зависят от роли *@
+    <div class="toolbar">
+        @if (Model.CanModerate)
+        {
+            <a class="btn btn-primary" asp-page="/Expeditions/Create" asp-route-anomalyId="@Model.Anomaly.Id">СНАРЯДИТЬ ЭКСПЕДИЦИЮ</a>
+
+            <label for="threat-select">СМЕНИТЬ УРОВЕНЬ УГРОЗЫ:</label>
+            <select id="threat-select">
+                @foreach (var level in Enum.GetValues<ThreatLevel>())
+                {
+                    <option value="@level" selected="@(level == Model.Anomaly.ThreatLevel)">@UiText.ThreatLabel(level)</option>
+                }
+            </select>
+            <button type="button" id="btn-threat" class="btn" data-target-anomaly="@Model.Anomaly.Id">ПРИМЕНИТЬ</button>
+        }
+
+        @if (Model.IsAgent)
+        {
+            <a class="btn" asp-page="/Reports/Create">СОЗДАТЬ ОТЧЁТ</a>
+        }
+
+        <a class="btn btn-link" asp-page="/Anomalies/Index">К СПИСКУ</a>
+    </div>
+</section>
+
+<section class="grid grid-2">
+    <div class="card">
+        <h2 class="card-title">СВЯЗАННЫЕ ЭКСПЕДИЦИИ</h2>
+        @if (Model.Expeditions.Any())
+        {
+            <table class="table">
+                <thead>
+                    <tr><th>КОД</th><th>РУКОВОДИТЕЛЬ</th><th>НАЧАЛО</th><th>СТАТУС</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var e in Model.Expeditions)
+                    {
+                        <tr>
+                            <td><a asp-page="/Expeditions/Details" asp-route-id="@e.Id">@UiText.ExpeditionCode(e.Id)</a></td>
+                            <td>@e.Leader.Callsign</td>
+                            <td>@e.StartDate.ToString("yyyy-MM-dd")</td>
+                            <td><span class="badge @UiText.ExpeditionStatusClass(e.Status)">@UiText.ExpeditionStatusLabel(e.Status)</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p class="muted">Экспедиций к этой аномалии не отправлялось.</p>
+        }
+    </div>
+
+    <div class="card">
+        <h2 class="card-title">ТЕЛЕМЕТРИЯ (ПОСЛЕДНИЕ ЗАМЕРЫ)</h2>
+        <ul class="terminal">
+            @foreach (var log in Model.Logs)
+            {
+                <li class="terminal-line">[@log.RecordedAt.ToString("MM-dd HH:mm")] @log.Source // @log.Message: @log.Reading.ToString("0.0#", CultureInfo.InvariantCulture)</li>
+            }
+            @if (!Model.Logs.Any())
+            {
+                <li class="terminal-line">ЗАМЕРОВ НЕТ</li>
+            }
+        </ul>
+    </div>
+</section>
+
+@section Scripts {
+    @if (Model.CanModerate)
+    {
+        <script src="~/js/anomaly-details.js" asp-append-version="true"></script>
+    }
+}

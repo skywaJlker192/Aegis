@@ -1,0 +1,34 @@
+@* Модальное окно сканера. Разметка статична (без Razor-выражений): скрипт wwwroot/js/scanner.js её оживляет. *@
+<div id="scan-modal" class="modal" hidden>
+    <div class="modal-box scanner" role="dialog" aria-modal="true" aria-labelledby="scan-title">
+        <h2 id="scan-title" class="card-title">ПРОТОКОЛ СКАНИРОВАНИЯ // <span id="scan-target">—</span></h2>
+
+        <div class="scan-screen">
+            <div class="scan-radar" aria-hidden="true"></div>
+
+            <div id="scan-status" class="scan-status">СКАНИРОВАНИЕ<span class="cursor-block"></span></div>
+
+            <div class="scan-readout">
+                <span id="scan-freq" class="scan-freq">00.00</span>
+                <span class="scan-unit">кГц</span>
+            </div>
+
+            <div id="scan-track" class="scan-track">
+                <div id="scan-zone" class="scan-zone"></div>
+                <div id="scan-needle" class="scan-needle"></div>
+            </div>
+
+            <div class="scan-scale" aria-hidden="true">
+                <span>0</span><span>25</span><span>50</span><span>75</span><span>100</span>
+            </div>
+
+            <div id="scan-result" class="scan-result"></div>
+        </div>
+
+        <div class="toolbar">
+            <button type="button" id="scan-lock" class="btn btn-primary">ЗАФИКСИРОВАТЬ</button>
+            <button type="button" id="scan-retry" class="btn" hidden>ПОВТОРИТЬ СКАНИРОВАНИЕ</button>
+            <button type="button" id="scan-close" class="btn btn-link">ЗАКРЫТЬ</button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,34 @@
+@page
+@model Aegis.Pages.Journal.ModerationModel
+@{
+    ViewData["Title"] = "МОДЕРАЦИЯ ЖУРНАЛОВ";
+}
+
+<h1 class="page-title cursor">МОДЕРАЦИЯ ЖУРНАЛОВ</h1>
+
+<section class="card">
+    <h2 class="card-title">ОЖИДАЮТ РЕШЕНИЯ: <span id="pending-count">@Model.Pending.Count</span></h2>
+    <div id="journal-list">
+        @foreach (var entry in Model.Pending)
+        {
+            <partial name="_Entry" model="entry" view-data='new ViewDataDictionary(ViewData) { { "ShowAuthor", true }, { "Moderation", true } }' />
+        }
+    </div>
+    <p id="pending-empty" class="muted" hidden="@(Model.Pending.Any() ? "hidden" : null)">Новых записей нет.</p>
+</section>
+
+<section class="card">
+    <h2 class="card-title">ПОСЛЕДНИЕ РЕШЕНИЯ</h2>
+    @foreach (var entry in Model.Recent)
+    {
+        <partial name="_Entry" model="entry" view-data='new ViewDataDictionary(ViewData) { { "ShowAuthor", true } }' />
+    }
+    @if (!Model.Recent.Any())
+    {
+        <p class="muted">Решений пока нет.</p>
+    }
+</section>
+
+@section Scripts {
+    <script src="~/js/journal.js" asp-append-version="true"></script>
+}

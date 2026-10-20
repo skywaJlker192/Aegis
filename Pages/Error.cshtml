@@ -1,0 +1,15 @@
+@page
+@model ErrorModel
+@{
+    ViewData["Title"] = "СБОЙ СИСТЕМЫ";
+}
+
+<h1 class="page-title cursor">СБОЙ СИСТЕМЫ</h1>
+<section class="card">
+    <p>Произошла внутренняя ошибка. Сообщите оператору код запроса.</p>
+    @if (!string.IsNullOrEmpty(Model.RequestId))
+    {
+        <p class="meta">КОД ЗАПРОСА: <code>@Model.RequestId</code></p>
+    }
+    <a class="btn" asp-page="/Index">НА ГЛАВНУЮ</a>
+</section>

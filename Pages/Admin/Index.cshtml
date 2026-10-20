@@ -1,0 +1,63 @@
+@page
+@model Aegis.Pages.Admin.IndexModel
+@{
+    ViewData["Title"] = "АДМИН-ПАНЕЛЬ";
+}
+
+<h1 class="page-title cursor">АДМИНИСТРИРОВАНИЕ // ДОПУСКИ</h1>
+
+<section class="card">
+    <h2 class="card-title">АГЕНТЫ: @Model.Users.Count</h2>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ПОЗЫВНОЙ</th>
+                <th>EMAIL</th>
+                <th>СОСТОЯНИЕ</th>
+                <th>ДОПУСК</th>
+                <th>РОЛИ</th>
+                <th>УПРАВЛЕНИЕ РОЛЯМИ</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var u in Model.Users)
+            {
+                <tr>
+                    <td>@u.Callsign</td>
+                    <td>@u.Email</td>
+                    <td>@UiText.AgentStatusLabel(u.Status)</td>
+                    <td>
+                        <form method="post" asp-page-handler="Clearance" class="inline-form">
+                            <input type="hidden" name="userId" value="@u.Id" />
+                            <input type="number" name="level" min="@(u.Id == Model.CurrentUserId ? 5 : 1)" max="5" value="@u.ClearanceLevel" class="input-tiny" />
+                            <button type="submit" class="btn btn-small">OK</button>
+                        </form>
+                    </td>
+                    <td>
+                        @foreach (var role in u.Roles)
+                        {
+                            <form method="post" asp-page-handler="RemoveRole" class="inline-form">
+                                <input type="hidden" name="userId" value="@u.Id" />
+                                <input type="hidden" name="role" value="@role" />
+                                <button type="submit" class="btn btn-small" title="Снять роль">@role.ToUpperInvariant() ✕</button>
+                            </form>
+                        }
+                    </td>
+                    <td>
+                        <form method="post" asp-page-handler="AddRole" class="inline-form">
+                            <input type="hidden" name="userId" value="@u.Id" />
+                            <select name="role">
+                                @foreach (var role in AppRoles.All.Where(r => !u.Roles.Contains(r)))
+                                {
+                                    <option value="@role">@role.ToUpperInvariant()</option>
+                                }
+                            </select>
+                            <button type="submit" class="btn btn-small btn-primary">НАЗНАЧИТЬ</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</section>

@@ -1,0 +1,164 @@
+@page "{id:int}"
+@model Aegis.Pages.Expeditions.DetailsModel
+@{
+    ViewData["Title"] = UiText.ExpeditionCode(Model.Expedition.Id);
+    var statusClass = UiText.ExpeditionStatusClass(Model.Expedition.Status);
+}
+
+@* data-expedition-id читают expedition.js и realtime.js (подписка на группу SignalR) *@
+<div id="expedition-root" data-expedition-id="@Model.Expedition.Id">
+
+    <h1 class="page-title cursor">ЭКСПЕДИЦИЯ // @UiText.ExpeditionCode(Model.Expedition.Id)</h1>
+
+    <section class="card">
+        <div class="card-head">
+            <h2 class="card-title">ЦЕЛЬ: @Model.Expedition.Anomaly.Title</h2>
+            <span>
+                <span id="exp-lamp" class="lamp @statusClass"></span>
+                <span id="exp-status" class="badge @statusClass">@UiText.ExpeditionStatusLabel(Model.Expedition.Status)</span>
+            </span>
+        </div>
+
+        <dl class="dossier">
+            <dt>РУКОВОДИТЕЛЬ</dt>
+            <dd>@Model.Expedition.Leader.Callsign</dd>
+            <dt>НАЧАЛО</dt>
+            <dd>@Model.Expedition.StartDate.ToString("yyyy-MM-dd")</dd>
+            <dt>ОКОНЧАНИЕ</dt>
+            <dd>@(Model.Expedition.EndDate?.ToString("yyyy-MM-dd") ?? "—")</dd>
+            <dt>АНОМАЛИЯ</dt>
+            <dd><a asp-page="/Anomalies/Details" asp-route-id="@Model.Expedition.TargetAnomalyId">@UiText.AnomalyCode(Model.Expedition.TargetAnomalyId)</a></dd>
+        </dl>
+
+        <div class="toolbar">
+            @* Кнопка видна только если политика CanAbortExpedition разрешила (пользователь — руководитель) *@
+            @if (Model.CanAbort)
+            {
+                <button type="button" id="btn-abort" class="btn btn-danger">SOS / ЗАПРОС ЭВАКУАЦИИ — ПРЕРВАТЬ ЭКСПЕДИЦИЮ</button>
+            }
+            <a class="btn" asp-page="/Reports/Create" asp-route-expeditionId="@Model.Expedition.Id">СОЗДАТЬ ОТЧЁТ</a>
+            <a class="btn btn-link" asp-page="/Expeditions/Index">К СПИСКУ</a>
+        </div>
+    </section>
+
+    <section class="grid grid-2">
+        <div class="card">
+            <h2 class="card-title">ЭКИПАЖ</h2>
+            <table class="table">
+                <thead>
+                    <tr><th>ПОЗЫВНОЙ</th><th>РОЛЬ</th><th>СОСТОЯНИЕ</th></tr>
+                </thead>
+                <tbody id="crew-body">
+                    @foreach (var m in Model.Expedition.Members)
+                    {
+                        <tr id="member-@m.AgentId">
+                            <td>@m.Agent.Callsign</td>
+                            <td>@m.RoleInMission</td>
+                            <td>
+                                <span class="lamp @(m.IsAlive ? "status-active" : "status-aborted")"></span>
+                                @(m.IsAlive ? "НА СВЯЗИ" : "ПОТЕРЯН")
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            @if (Model.CanManageCrew)
+            {
+                <div id="add-member-panel" class="toolbar">
+                    <label for="agent-select">АГЕНТ:</label>
+                    <select id="agent-select">
+                        <option value="">— ВЫБЕРИТЕ —</option>
+                        @foreach (var a in Model.AvailableAgents)
+                        {
+                            <option value="@a.Id">@a.Callsign</option>
+                        }
+                    </select>
+
+                    <label for="role-select">РОЛЬ:</label>
+                    <select id="role-select">
+                        @foreach (var role in Aegis.Pages.Expeditions.DetailsModel.RoleOptions)
+                        {
+                            <option value="@role">@role</option>
+                        }
+                    </select>
+
+                    <button type="button" id="btn-add-member" class="btn btn-primary">ДОБАВИТЬ В ЭКИПАЖ</button>
+                </div>
+            }
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">ТЕЛЕМЕТРИЯ // ПРЯМОЙ ЭФИР</h2>
+            <ul id="telemetry-log" class="terminal">
+                <li class="terminal-line">ОЖИДАНИЕ СИГНАЛА...</li>
+            </ul>
+
+            <div class="toolbar">
+                <input id="telemetry-input" type="text" maxlength="200" placeholder="Сообщение для штаба..." />
+                <button type="button" id="btn-telemetry" class="btn">ПЕРЕДАТЬ</button>
+            </div>
+            <p class="meta">Сообщение увидят только участники экспедиции и модераторы.</p>
+        </div>
+    </section>
+
+    <section id="comms-panel" class="card comms" data-callsign="@Model.MyCallsign">
+        <div class="card-head">
+            <h2 class="card-title">ПРОТОКОЛ СВЯЗИ // ШТАБ ⇄ ПОЛЕ</h2>
+            <span class="link-status">
+                <span id="comms-lamp" class="lamp lamp-off"></span>
+                <span id="comms-state">СВЯЗЬ: ОЖИДАНИЕ</span>
+            </span>
+        </div>
+
+        <ul id="comms-log" class="terminal comms-log" aria-live="polite">
+            <li class="comm-line comm-system">УСТАНОВКА СОЕДИНЕНИЯ...</li>
+        </ul>
+
+        <div class="comms-form">
+            <input id="comms-input" type="text" maxlength="500" placeholder="Сообщение (Enter — отправить)..." autocomplete="off" disabled />
+            <button type="button" id="comms-send" class="btn btn-primary" disabled>ПЕРЕДАТЬ</button>
+        </div>
+        <p class="meta">
+            <span class="legend-text comm-agent">АГЕНТ</span> ·
+            <span class="legend-text comm-hq">ШТАБ</span> ·
+            <span class="legend-text comm-system">СИСТЕМА</span>.
+            Сообщения сохраняются в журнале связи экспедиции.
+        </p>
+    </section>
+
+    <section class="card">
+        <h2 class="card-title">ОБЩИЙ ЖУРНАЛ ЭКСПЕДИЦИИ</h2>
+        @foreach (var entry in Model.JournalEntries)
+        {
+            <partial name="~/Pages/Journal/_Entry.cshtml" model="entry" view-data='new ViewDataDictionary(ViewData) { { "ShowAuthor", true } }' />
+        }
+        @if (!Model.JournalEntries.Any())
+        {
+            <p class="muted">Одобренных записей агентов пока нет.</p>
+        }
+    </section>
+
+    <section class="card">
+        <h2 class="card-title">ПОЛЕВЫЕ ОТЧЁТЫ</h2>
+
+        @foreach (var report in Model.Expedition.Reports.OrderByDescending(r => r.CreatedAt))
+        {
+            <partial name="_ReportItem" model="report" />
+        }
+
+        @if (!Model.Expedition.Reports.Any())
+        {
+            <p class="muted">Отчётов по этой экспедиции пока нет.</p>
+        }
+    </section>
+</div>
+
+@section Scripts {
+    <script src="~/js/expedition.js" asp-append-version="true"></script>
+    <script src="~/js/comms.js" asp-append-version="true"></script>
+    @if (Model.IsModerator)
+    {
+        <script src="~/js/reports.js" asp-append-version="true"></script>
+    }
+}

@@ -1,0 +1,22 @@
+@model FieldReport
+@{
+    // Кнопка «Принято» нужна только модератору/админу и только для ещё не принятых отчётов
+    var canApprove = (User.IsInRole(AppRoles.Moderator) || User.IsInRole(AppRoles.Admin)) && !Model.IsApproved;
+}
+
+<article id="report-@Model.Id" class="report @(Model.IsApproved ? "report-approved" : "report-pending")">
+    <header class="report-head">
+        <span>ОТЧЁТ №@Model.Id</span>
+        <span>АВТОР: @Model.Author.Callsign</span>
+        <span>@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm") UTC</span>
+        <span class="badge report-state">@(Model.IsApproved ? "ПРИНЯТО" : "НА РАССМОТРЕНИИ")</span>
+    </header>
+
+    @* Razor автоматически экранирует текст: <script> из отчёта отобразится как обычные символы и не выполнится *@
+    <pre class="report-text">@Model.Text</pre>
+
+    @if (canApprove)
+    {
+        <button type="button" class="btn btn-small btn-approve" data-report-id="@Model.Id">ПРИНЯТО</button>
+    }
+</article>

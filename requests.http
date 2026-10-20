@@ -1,0 +1,164 @@
+### =====================================================================
+### AEGIS API — примеры запросов
+### Работает в VS Code (расширение REST Client), Rider и Visual Studio 2022+.
+### Приложение по умолчанию слушает http://localhost:5080
+### =====================================================================
+
+@host = http://localhost:5080
+
+### ---------------------------------------------------------------------
+### 1. ЛОГИН: получить JWT (админ). Токен живёт 30 минут.
+### ---------------------------------------------------------------------
+# @name login
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@aegis.org",
+  "password": "AegisAdmin1!"
+}
+
+### Токен из ответа подставляется автоматически
+@token = {{login.response.body.$.token}}
+
+### ---------------------------------------------------------------------
+### 2. Логин обычного агента (видит только свои аномалии)
+### ---------------------------------------------------------------------
+# @name loginAgent
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "agent1@aegis.org",
+  "password": "Agent123"
+}
+
+###
+@agentToken = {{loginAgent.response.body.$.token}}
+
+### ---------------------------------------------------------------------
+### 3. Без токена -> 401 Unauthorized
+### ---------------------------------------------------------------------
+GET {{host}}/api/v1/anomalies
+
+### ---------------------------------------------------------------------
+### 4. v1: список аномалий (200)
+### ---------------------------------------------------------------------
+GET {{host}}/api/v1/anomalies
+Authorization: Bearer {{token}}
+
+### v1: список от лица агента — только «его» аномалии
+GET {{host}}/api/v1/anomalies
+Authorization: Bearer {{agentToken}}
+
+### ---------------------------------------------------------------------
+### 5. v1: аномалия по Id (200 / 404)
+### ---------------------------------------------------------------------
+GET {{host}}/api/v1/anomalies/1
+Authorization: Bearer {{token}}
+
+### Несуществующая -> 404
+GET {{host}}/api/v1/anomalies/9999
+Authorization: Bearer {{token}}
+
+### ---------------------------------------------------------------------
+### 6. v2: то же + массив TelemetryLogs
+### ---------------------------------------------------------------------
+GET {{host}}/api/v2/anomalies
+Authorization: Bearer {{token}}
+
+###
+GET {{host}}/api/v2/anomalies/1
+Authorization: Bearer {{token}}
+
+### ---------------------------------------------------------------------
+### 7. POST: создать аномалию (201 + заголовок Location).
+###    Все открытые дашборды получат уведомление «Новая аномалия обнаружена».
+### ---------------------------------------------------------------------
+# @name created
+POST {{host}}/api/v1/anomalies
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Аномальный шум в вентиляции, блок Г",
+  "description": "Низкочастотный гул, слышимый только в ночные часы.",
+  "coordinates": { "latitude": 55.7512, "longitude": 37.6184 },
+  "threatLevel": "Medium"
+}
+
+### Ошибка валидации (слишком короткий title, широта вне диапазона) -> 400
+POST {{host}}/api/v1/anomalies
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "A",
+  "coordinates": { "latitude": 999, "longitude": 0 },
+  "threatLevel": "Low"
+}
+
+### Агент не может создавать аномалии -> 403
+POST {{host}}/api/v1/anomalies
+Authorization: Bearer {{agentToken}}
+Content-Type: application/json
+
+{
+  "title": "Попытка от агента",
+  "coordinates": { "latitude": 10, "longitude": 10 },
+  "threatLevel": "Low"
+}
+
+### ---------------------------------------------------------------------
+### 8. PUT: обновить статус и угрозу (200).
+###    Если угроза изменилась, всем уходит BroadcastThreatLevelChange.
+### ---------------------------------------------------------------------
+PUT {{host}}/api/v1/anomalies/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "Contained",
+  "threatLevel": "High"
+}
+
+### Запрещённый переход: нейтрализованную (id=4) нельзя вернуть в Detected -> 400 ProblemDetails
+PUT {{host}}/api/v1/anomalies/4
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "Detected",
+  "threatLevel": "Low"
+}
+
+### Несуществующий id -> 404
+PUT {{host}}/api/v1/anomalies/9999
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "Contained",
+  "threatLevel": "Low"
+}
+
+### ---------------------------------------------------------------------
+### 9. DELETE: удалить аномалию (204), только Admin
+### ---------------------------------------------------------------------
+DELETE {{host}}/api/v1/anomalies/6
+Authorization: Bearer {{token}}
+
+### Повторно -> 404
+DELETE {{host}}/api/v1/anomalies/6
+Authorization: Bearer {{token}}
+
+### ---------------------------------------------------------------------
+### 10. Неверный пароль -> 401 (после 5 попыток подряд аккаунт блокируется на 15 минут -> 423)
+### ---------------------------------------------------------------------
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "agent2@aegis.org",
+  "password": "wrong-password"
+}

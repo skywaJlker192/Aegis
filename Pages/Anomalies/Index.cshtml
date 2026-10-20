@@ -1,0 +1,56 @@
+@page
+@model Aegis.Pages.Anomalies.IndexModel
+@{
+    ViewData["Title"] = "КАРТА АНОМАЛИЙ";
+}
+
+<h1 class="page-title cursor">КАРТА АНОМАЛИЙ</h1>
+
+<section class="card">
+    @* GET-форма фильтра: Tag Helpers asp-for / asp-items / asp-page (в Razor Pages вместо asp-action используется asp-page) *@
+    <form method="get" asp-page="/Anomalies/Index" class="toolbar">
+        <label asp-for="Level">УРОВЕНЬ УГРОЗЫ:</label>
+        <select asp-for="Level" asp-items="Html.GetEnumSelectList<ThreatLevel>()">
+            <option value="">ВСЕ УРОВНИ</option>
+        </select>
+        <button type="submit" class="btn">ПРИМЕНИТЬ</button>
+        <a class="btn btn-link" asp-page="/Anomalies/Index">СБРОС</a>
+    </form>
+</section>
+
+<section class="card">
+    <h2 class="card-title">ЗАРЕГИСТРИРОВАНО: @Model.Anomalies.Count</h2>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th></th>
+                <th>КОД</th>
+                <th>НАЗВАНИЕ</th>
+                <th>КООРДИНАТЫ</th>
+                <th>УГРОЗА</th>
+                <th>СТАТУС</th>
+                <th>ОБНАРУЖЕНА</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var a in Model.Anomalies)
+            {
+                <tr>
+                    <td><span class="lamp @UiText.ThreatClass(a.ThreatLevel)" data-anomaly-id="@a.Id"></span></td>
+                    <td>@UiText.AnomalyCode(a.Id)</td>
+                    <td><a asp-page="/Anomalies/Details" asp-route-id="@a.Id">@a.Title</a></td>
+                    <td class="nowrap">@a.Latitude.ToString("F4", CultureInfo.InvariantCulture) / @a.Longitude.ToString("F4", CultureInfo.InvariantCulture)</td>
+                    <td><span class="badge @UiText.ThreatClass(a.ThreatLevel)" data-anomaly-id="@a.Id" data-threat-label-for="@a.Id">@UiText.ThreatLabel(a.ThreatLevel)</span></td>
+                    <td>@UiText.AnomalyStatusLabel(a.Status)</td>
+                    <td class="nowrap">@a.DetectedAt.ToString("yyyy-MM-dd")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @if (!Model.Anomalies.Any())
+    {
+        <p class="muted">По заданному фильтру аномалий не обнаружено.</p>
+    }
+</section>

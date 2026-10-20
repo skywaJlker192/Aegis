@@ -1,0 +1,19 @@
+@page
+@model ClearanceDeniedModel
+@{
+    ViewData["Title"] = "НЕДОСТАТОЧНЫЙ ДОПУСК";
+}
+
+<h1 class="page-title cursor">НЕДОСТАТОЧНЫЙ ДОПУСК // 403</h1>
+
+<section class="card narrow card-critical">
+    <p>ДЛЯ ДОСТУПА К ЭТОМУ РАЗДЕЛУ ТРЕБУЕТСЯ <strong>ДОПУСК УРОВНЯ @Model.Required</strong>.</p>
+    <dl class="dossier">
+        <dt>ТРЕБУЕТСЯ</dt>
+        <dd><span class="clearance-badge @UiText.ClearanceClass(Model.Required)">УРОВЕНЬ @Model.Required</span></dd>
+        <dt>ВАШ ДОПУСК</dt>
+        <dd><span class="clearance-badge @UiText.ClearanceClass(Model.Current)">УРОВЕНЬ @Model.Current</span></dd>
+    </dl>
+    <p class="meta">Повышение допуска выполняет администратор штаба.</p>
+    <a class="btn" asp-page="/Index">ВЕРНУТЬСЯ В ШТАБ</a>
+</section>

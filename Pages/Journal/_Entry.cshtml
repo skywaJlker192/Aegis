@@ -1,0 +1,33 @@
+@using Aegis.Models
+@* Одна запись журнала. Модель: AgentJournal (Agent, Expedition должны быть загружены).
+   ViewData["ShowAuthor"] = true — показать позывной автора; ViewData["Moderation"] = true — кнопки модератора. *@
+@model AgentJournal
+@{
+    var showAuthor = ViewData["ShowAuthor"] as bool? ?? false;
+    var moderation = ViewData["Moderation"] as bool? ?? false;
+    var state = Model.IsApproved ? "approved" : Model.IsRejected ? "rejected" : "pending";
+    var stateText = Model.IsApproved ? "ОДОБРЕНО" : Model.IsRejected ? "ОТКЛОНЕНО" : "НА МОДЕРАЦИИ";
+}
+<article id="journal-@Model.Id" class="journal-entry @UiText.JournalTypeClass(Model.EntryType) journal-@state" data-state="@state">
+    <header class="journal-head">
+        <span class="journal-type">@UiText.JournalTypeLabel(Model.EntryType)</span>
+        <span class="journal-date">@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm")</span>
+        @if (showAuthor)
+        {
+            <span class="journal-author">@Model.Agent.Callsign</span>
+        }
+        @if (Model.Expedition is not null)
+        {
+            <a class="journal-exp" asp-page="/Expeditions/Details" asp-route-id="@Model.ExpeditionId">@UiText.ExpeditionCode(Model.Expedition.Id)</a>
+        }
+        <span class="badge journal-state">@stateText</span>
+    </header>
+    <p class="journal-text">@Model.Text</p>
+    @if (moderation && state == "pending")
+    {
+        <div class="toolbar journal-actions">
+            <button type="button" class="btn btn-small btn-primary btn-journal" data-id="@Model.Id" data-action="approve">ОДОБРИТЬ</button>
+            <button type="button" class="btn btn-small btn-danger btn-journal" data-id="@Model.Id" data-action="reject">ОТКЛОНИТЬ</button>
+        </div>
+    }
+</article>

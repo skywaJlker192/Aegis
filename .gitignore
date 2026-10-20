@@ -1,0 +1,79 @@
+## ===== .NET / ASP.NET Core =====
+# Результаты сборки
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+publish/
+artifacts/
+*.dll
+*.exe
+*.pdb
+*.nupkg
+
+# База данных SQLite (создаётся при первом запуске, содержит тестовые данные и пользователей)
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# Локальные настройки и секреты (не коммитить!)
+appsettings.Development.json
+appsettings.Local.json
+appsettings.*.local.json
+secrets.json
+*.pfx
+.env
+.env.*
+
+# Ключи Data Protection, если они сохранялись рядом с проектом
+DataProtection-Keys/
+
+# Тесты и покрытие
+TestResults/
+*.trx
+coverage*.xml
+coverage*.json
+*.coverage
+
+## ===== Visual Studio =====
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.rsuser
+*.cache
+*.log
+*.tmp
+*.tmp_proj
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+launchSettings.local.json
+
+## ===== JetBrains Rider / IntelliJ =====
+.idea/
+*.sln.iml
+
+## ===== VS Code =====
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+## ===== Node (если появятся фронтенд-инструменты) =====
+node_modules/
+npm-debug.log*
+
+## ===== Операционные системы =====
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*~
+*.swp

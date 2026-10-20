@@ -1,0 +1,28 @@
+@page
+@model Aegis.Pages.Reports.IndexModel
+@{
+    ViewData["Title"] = "ОТЧЁТЫ";
+}
+
+<h1 class="page-title cursor">ПОЛЕВЫЕ ОТЧЁТЫ // ОЧЕРЕДЬ</h1>
+
+<section class="card">
+    <p class="meta">Нажмите «ПРИНЯТО» — отчёт позеленеет без перезагрузки страницы.</p>
+
+    @foreach (var report in Model.Reports)
+    {
+        <p class="meta">
+            <a asp-page="/Expeditions/Details" asp-route-id="@report.ExpeditionId">@UiText.ExpeditionCode(report.ExpeditionId)</a>
+        </p>
+        <partial name="_ReportItem" model="report" />
+    }
+
+    @if (!Model.Reports.Any())
+    {
+        <p class="muted">Отчётов нет.</p>
+    }
+</section>
+
+@section Scripts {
+    <script src="~/js/reports.js" asp-append-version="true"></script>
+}

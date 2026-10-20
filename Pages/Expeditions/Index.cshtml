@@ -1,0 +1,62 @@
+@page
+@model Aegis.Pages.Expeditions.IndexModel
+@{
+    ViewData["Title"] = Model.OnlyMine ? "МОИ МИССИИ" : "ЭКСПЕДИЦИИ";
+}
+
+<h1 class="page-title cursor">@(Model.OnlyMine ? "МОИ МИССИИ" : "УПРАВЛЕНИЕ ЭКСПЕДИЦИЯМИ")</h1>
+
+@if (Model.IsPrivileged)
+{
+    <section class="card">
+        <div class="toolbar">
+            <a class="btn btn-primary" asp-page="/Expeditions/Create">+ НОВАЯ ЭКСПЕДИЦИЯ</a>
+            <a class="btn" asp-page="/Expeditions/Index">ВСЕ</a>
+            <a class="btn" asp-page="/Expeditions/Index" asp-route-mine="true">ТОЛЬКО МОИ</a>
+        </div>
+    </section>
+}
+
+<section class="card">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>КОД</th>
+                <th>ЦЕЛЬ</th>
+                <th>РУКОВОДИТЕЛЬ</th>
+                <th>НАЧАЛО</th>
+                <th>ЭКИПАЖ</th>
+                <th>СТАТУС</th>
+                <th>СВЯЗЬ</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var e in Model.Expeditions)
+            {
+                <tr>
+                    <td><a asp-page="/Expeditions/Details" asp-route-id="@e.Id">@UiText.ExpeditionCode(e.Id)</a></td>
+                    <td>@e.Anomaly.Title</td>
+                    <td>@e.Leader.Callsign</td>
+                    <td class="nowrap">@e.StartDate.ToString("yyyy-MM-dd")</td>
+                    <td>@e.Members.Count</td>
+                    <td><span class="badge @UiText.ExpeditionStatusClass(e.Status)">@UiText.ExpeditionStatusLabel(e.Status)</span></td>
+                    <td>
+                        @if (Model.Unread.TryGetValue(e.Id, out var unread) && unread > 0)
+                        {
+                            <a asp-page="/Expeditions/Details" asp-route-id="@e.Id" class="badge badge-unread">✉ @unread НОВ.</a>
+                        }
+                        else
+                        {
+                            <span class="muted">—</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @if (!Model.Expeditions.Any())
+    {
+        <p class="muted">Экспедиций не найдено.</p>
+    }
+</section>

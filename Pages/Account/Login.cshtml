@@ -1,0 +1,36 @@
+@page
+@model LoginModel
+@{
+    ViewData["Title"] = "ВХОД";
+}
+
+<h1 class="page-title cursor">ИДЕНТИФИКАЦИЯ АГЕНТА</h1>
+
+<section class="card narrow">
+    <h2 class="card-title">ПРОТОКОЛ АВТОРИЗАЦИИ</h2>
+
+    <form method="post" class="form">
+        <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+        <input type="hidden" asp-for="ReturnUrl" />
+
+        <div class="form-row">
+            <label asp-for="Input.Email"></label>
+            <input asp-for="Input.Email" autocomplete="username" />
+            <span asp-validation-for="Input.Email" class="field-error"></span>
+        </div>
+
+        <div class="form-row">
+            <label asp-for="Input.Password"></label>
+            <input asp-for="Input.Password" autocomplete="current-password" />
+            <span asp-validation-for="Input.Password" class="field-error"></span>
+        </div>
+
+        <div class="form-row form-row-check">
+            <input asp-for="Input.RememberMe" />
+            <label asp-for="Input.RememberMe"></label>
+        </div>
+
+        <button type="submit" class="btn btn-primary">ВОЙТИ</button>
+        <a class="btn btn-link" asp-page="/Account/Register">НЕТ ДОПУСКА? РЕГИСТРАЦИЯ</a>
+    </form>
+</section>

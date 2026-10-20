@@ -1,0 +1,13 @@
+@page
+@model AccessDeniedModel
+@{
+    ViewData["Title"] = "ДОСТУП ЗАПРЕЩЁН";
+}
+
+<h1 class="page-title cursor">ДОСТУП ЗАПРЕЩЁН // 403</h1>
+
+<section class="card narrow card-critical">
+    <p>НЕДОСТАТОЧНЫЙ УРОВЕНЬ ДОПУСКА ДЛЯ ПРОСМОТРА ЭТОГО ДОКУМЕНТА.</p>
+    <p class="meta">Если вы считаете, что это ошибка, обратитесь к администратору штаба.</p>
+    <a class="btn" asp-page="/Index">ВЕРНУТЬСЯ В ШТАБ</a>
+</section>

@@ -1,0 +1,48 @@
+@page
+@model Aegis.Pages.Expeditions.CreateModel
+@{
+    ViewData["Title"] = "НОВАЯ ЭКСПЕДИЦИЯ";
+}
+
+<h1 class="page-title cursor">ПРОТОКОЛ СНАРЯЖЕНИЯ ЭКСПЕДИЦИИ</h1>
+
+<section class="card narrow">
+    <h2 class="card-title">ФОРМА №E-1</h2>
+
+    @* Tag Helper формы сам добавляет антифорджери-токен *@
+    <form method="post" class="form">
+        @* Ошибки, не привязанные к конкретному полю *@
+        <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+        <div class="form-row">
+            <label asp-for="Input.TargetAnomalyId"></label>
+            <select asp-for="Input.TargetAnomalyId" asp-items="Model.AnomalyOptions">
+                <option value="">— ВЫБЕРИТЕ АНОМАЛИЮ —</option>
+            </select>
+            <span asp-validation-for="Input.TargetAnomalyId" class="field-error"></span>
+        </div>
+
+        <div class="form-row">
+            <label asp-for="Input.LeaderId"></label>
+            <select asp-for="Input.LeaderId" asp-items="Model.AgentOptions">
+                <option value="">— НАЗНАЧЬТЕ РУКОВОДИТЕЛЯ —</option>
+            </select>
+            <span asp-validation-for="Input.LeaderId" class="field-error"></span>
+        </div>
+
+        <div class="form-row">
+            <label asp-for="Input.StartDate"></label>
+            <input asp-for="Input.StartDate" type="date" />
+            <span asp-validation-for="Input.StartDate" class="field-error"></span>
+        </div>
+
+        <div class="form-row">
+            <label asp-for="Input.EndDate"></label>
+            <input asp-for="Input.EndDate" type="date" />
+            <span asp-validation-for="Input.EndDate" class="field-error"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">УТВЕРДИТЬ</button>
+        <a class="btn btn-link" asp-page="/Expeditions/Index">ОТМЕНА</a>
+    </form>
+</section>

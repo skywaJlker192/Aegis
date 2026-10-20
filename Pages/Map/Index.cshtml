@@ -1,0 +1,23 @@
+@page
+@model Aegis.Pages.Map.IndexModel
+@{
+    ViewData["Title"] = "КАРТА ОПЕРАЦИЙ";
+}
+
+<h1 class="page-title cursor">КАРТА ОПЕРАЦИЙ // ЖИВОЙ ТРЕКЕР</h1>
+
+<section class="card">
+    <p class="meta">Положения агентов обновляются каждые 30 секунд (имитация телеметрии, событие SignalR <code>AgentLocationUpdate</code>). Нажмите на точку агента, чтобы открыть карточку.</p>
+    <partial name="_OpsMap" />
+</section>
+
+<section class="card">
+    <h2 class="card-title">ЖУРНАЛ ТРЕКЕРА</h2>
+    <ul id="map-log" class="terminal terminal-short">
+        <li class="terminal-line">ТРЕКЕР // ожидание телеметрии...</li>
+    </ul>
+</section>
+
+@section Scripts {
+    <script src="~/js/ops-map.js" asp-append-version="true"></script>
+}
